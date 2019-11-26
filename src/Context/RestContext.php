@@ -10,6 +10,7 @@ use Behat\Symfony2Extension\Context\KernelAwareContext;
 use Behat\Symfony2Extension\Context\KernelDictionary;
 use PHPUnit\Framework\Assert;
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -34,7 +35,7 @@ final class RestContext implements Context, KernelAwareContext
     {
         $this->Symfony2ExtensionSetKernel($kernel);
 
-        $this->client = new Client($kernel);
+        $this->client = new KernelBrowser($kernel);
     }
 
     /**
