@@ -8,11 +8,13 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Symfony2Extension\Context\KernelAwareContext;
 use Behat\Symfony2Extension\Context\KernelDictionary;
+use Gvf\SymfonyRestExtension\HttpCall\HttpCallResultPool;
 use PHPUnit\Framework\Assert;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
+use function strtolower;
 
 final class RestContext implements Context, KernelAwareContext
 {
@@ -25,11 +27,19 @@ final class RestContext implements Context, KernelAwareContext
      */
     protected $client;
 
+    /** @var HttpCallResultPool */
+    protected $httpCallResultPool;
+
     /** @var Response */
     private $response;
 
     /** @var array */
     private $headers = [];
+
+    public function __construct(HttpCallResultPool $httpCallResultPool)
+    {
+        $this->httpCallResultPool = $httpCallResultPool;
+    }
 
     public function setKernel(KernelInterface $kernel)
     {
@@ -57,7 +67,7 @@ final class RestContext implements Context, KernelAwareContext
         return $this->sendRequest($method, $url, $parameters, $files);
     }
 
-    private function sendRequest(string $method, string $url, array $parameters = [], array $files = [], string $body = null)
+    public function sendRequest(string $method, string $url, array $parameters = [], array $files = [], string $body = null)
     {
         $this->client->request(
             $method,
@@ -103,7 +113,7 @@ final class RestContext implements Context, KernelAwareContext
      */
     public function theResponseShouldBeEqualTo(PyStringNode $expected)
     {
-        throw new PendingException();
+        Assert::assertEquals($expected, $this->httpCallResultPool->getResult()->getValue());
     }
 
     /**
@@ -167,16 +177,6 @@ final class RestContext implements Context, KernelAwareContext
     }
 
     /**
-     * Add an header element in a request
-     *
-     * @Then I add :name header equal to :value
-     */
-    public function iAddHeaderEqualTo($name, $value)
-    {
-        $this->headers[$name] = $value;
-    }
-
-    /**
      * @Then the response should be encoded in :encoding
      */
     public function theResponseShouldBeEncodedIn($encoding)
@@ -198,9 +198,29 @@ final class RestContext implements Context, KernelAwareContext
      */
     public function theResponseShouldBeInJson()
     {
-        $this->response->headers->contains(
-            'Content-Type',
-            'application/json'
+        Assert::assertTrue(
+            $this->response->headers->contains(
+                'Content-Type',
+                'application/json'
+            )
         );
+    }
+
+    /**
+     * @Given I add :name header with timestamp :value minutes ago
+     */
+    public function iAddHeaderWithTimestampMinutesAgo($name, $value)
+    {
+        $this->iAddHeaderEqualTo($name, \time() - (60 * $value));
+    }
+
+    /**
+     * Add an header element in a request
+     *
+     * @Then I add :name header equal to :value
+     */
+    public function iAddHeaderEqualTo($name, $value)
+    {
+        $this->headers[$name] = $value;
     }
 }
