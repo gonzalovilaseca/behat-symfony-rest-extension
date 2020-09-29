@@ -6,24 +6,16 @@ use Behat\Behat\Context\Context;
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
-use Behat\Symfony2Extension\Context\KernelAwareContext;
-use Behat\Symfony2Extension\Context\KernelDictionary;
 use Gvf\SymfonyRestExtension\HttpCall\HttpCallResultPool;
 use PHPUnit\Framework\Assert;
-use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
 use function strtolower;
 
-final class RestContext implements Context, KernelAwareContext
+final class RestContext implements Context
 {
-    use KernelDictionary {
-        setKernel as Symfony2ExtensionSetKernel;
-    }
-
     /**
-     * @var Client
+     * @var KernelBrowser
      */
     protected $client;
 
@@ -36,16 +28,10 @@ final class RestContext implements Context, KernelAwareContext
     /** @var array */
     private $headers = [];
 
-    public function __construct(HttpCallResultPool $httpCallResultPool)
+    public function __construct(HttpCallResultPool $httpCallResultPool, KernelBrowser $client)
     {
         $this->httpCallResultPool = $httpCallResultPool;
-    }
-
-    public function setKernel(KernelInterface $kernel)
-    {
-        $this->Symfony2ExtensionSetKernel($kernel);
-
-        $this->client = new KernelBrowser($kernel);
+        $this->client = $client;
     }
 
     /**
@@ -125,7 +111,7 @@ final class RestContext implements Context, KernelAwareContext
     }
 
     /**
-     * @Then the header :name should be equal to :value
+     * @Then the response header :name should be equal to :value
      */
     public function theHeaderShouldBeEqualTo($name, $value)
     {
@@ -200,7 +186,7 @@ final class RestContext implements Context, KernelAwareContext
     {
         Assert::assertTrue(
             $this->response->headers->contains(
-                'Content-Type',
+                'content-type',
                 'application/json'
             )
         );
