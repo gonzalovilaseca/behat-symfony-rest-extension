@@ -11,7 +11,6 @@ use ReflectionMethod;
  */
 final class ServiceArgumentResolver implements ArgumentResolver
 {
-    /** @var ContainerInterface */
     private $container;
 
     public function __construct(ContainerInterface $container)
@@ -48,3 +47,4 @@ final class ServiceArgumentResolver implements ArgumentResolver
         }
     }
 }
+
