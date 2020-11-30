@@ -52,6 +52,25 @@ final class JsonContext implements Context
         throw new PendingException();
     }
 
+        /**
+     * @Then the JSON should be like:
+     */
+    public function theJsonShouldBeLike(PyStringNode $expectedString)
+    {
+        $pattern = '/\n*/m';
+        $replace = '';
+        $removedLinebreaks = preg_replace($pattern, $replace, $expectedString);
+
+        $pattern = '~"[^"]*"(*SKIP)(*F)|\s+~';
+        $replace = '';
+        $removedLinebaksAndWhitespace = preg_replace($pattern, $replace, $removedLinebreaks);
+
+        // For chinese chars
+        $actual = \json_encode(\json_decode($this->getJson()->toJson()), JSON_UNESCAPED_UNICODE);
+        
+        Assert::assertRegExp($removedLinebaksAndWhitespace, $actual);
+    }
+    
     /**
      * @Then the JSON nodes should be equal to:
      */
