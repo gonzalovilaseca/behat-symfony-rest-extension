@@ -4,13 +4,15 @@
   "type": "project",
   "license": "MIT",
   "require": {
-    "php": "^7.2",
+    "php": "^7.4",
     "behat/behat": "^3.5",
     "nahid/jsonq": "^5.2",
     "phpunit/phpunit": "^9.3",
     "symfony/framework-bundle": "^5.0",
     "friends-of-behat/symfony-extension": "^2.1",
-    "symfony/browser-kit": "^5.0"
+    "symfony/browser-kit": "^5.0",
+    "swaggest/json-diff": "^3.8",
+    "ext-json": "*"
   },
   "autoload": {
     "psr-4": {

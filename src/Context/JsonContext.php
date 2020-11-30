@@ -6,9 +6,10 @@ use Behat\Behat\Context\Context;
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
+use Gvf\SymfonyRestExtension\HttpCall\HttpCallResultPool;
 use Nahid\JsonQ\Jsonq;
 use PHPUnit\Framework\Assert;
-use Gvf\SymfonyRestExtension\HttpCall\HttpCallResultPool;
+use Swaggest\JsonDiff\JsonDiff;
 
 final class JsonContext implements Context
 {
@@ -27,8 +28,20 @@ final class JsonContext implements Context
     {
         $json = new Jsonq();
         $json->json((string)$string);
+        $r = new JsonDiff(
+            \json_decode((string)$json->toJson()),
+            \json_decode((string)$this->getJson()->toJson()),
+            JsonDiff::REARRANGE_ARRAYS
+        );
 
-        Assert::assertEquals((string)$json->toJson(), (string)$this->getJson()->toJson());
+        Assert::assertEquals(0, $r->getDiffCnt());
+    }
+
+    private function getJson(): Jsonq
+    {
+        $json = new Jsonq();
+
+        return $json->json($this->httpCallResultPool->getResult()->getValue());
     }
 
     /**
@@ -55,6 +68,20 @@ final class JsonContext implements Context
     public function theJsonNodeShouldBeEqualTo($node, $text)
     {
         Assert::assertEquals($text, $this->find($node));
+    }
+
+    /**
+     * @param mixed $node
+     *
+     * @return mixed
+     * @throws \Nahid\JsonQ\Exceptions\ConditionNotAllowedException
+     * @throws \Nahid\JsonQ\Exceptions\FileNotFoundException
+     * @throws \Nahid\JsonQ\Exceptions\InvalidJsonException
+     * @throws \Nahid\JsonQ\Exceptions\NullValueException
+     */
+    private function find($node)
+    {
+        return $this->getJson()->find($node);
     }
 
     /**
@@ -168,26 +195,5 @@ final class JsonContext implements Context
     public function theJsonNodeShouldExist($name)
     {
         throw new PendingException();
-    }
-
-    private function getJson(): Jsonq
-    {
-        $json = new Jsonq();
-
-        return $json->json($this->httpCallResultPool->getResult()->getValue());
-    }
-
-    /**
-     * @param mixed $node
-     *
-     * @return mixed
-     * @throws \Nahid\JsonQ\Exceptions\ConditionNotAllowedException
-     * @throws \Nahid\JsonQ\Exceptions\FileNotFoundException
-     * @throws \Nahid\JsonQ\Exceptions\InvalidJsonException
-     * @throws \Nahid\JsonQ\Exceptions\NullValueException
-     */
-    private function find($node)
-    {
-        return $this->getJson()->find($node);
     }
 }
