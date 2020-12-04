@@ -12,7 +12,8 @@
     "friends-of-behat/symfony-extension": "^2.1",
     "symfony/browser-kit": "^5.0",
     "swaggest/json-diff": "^3.8",
-    "ext-json": "*"
+    "ext-json": "*",
+    "lukascivil/treewalker": "^0.41.0"
   },
   "autoload": {
     "psr-4": {
@@ -23,5 +24,8 @@
     "branch-alias": {
       "dev-master": "1.0"
     }
+  },
+  "require-dev": {
+    "phpspec/phpspec": "^7.0"
   }
 }

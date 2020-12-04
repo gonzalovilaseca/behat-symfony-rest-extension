@@ -9,7 +9,8 @@ use Behat\Gherkin\Node\TableNode;
 use Gvf\SymfonyRestExtension\HttpCall\HttpCallResultPool;
 use Nahid\JsonQ\Jsonq;
 use PHPUnit\Framework\Assert;
-use Swaggest\JsonDiff\JsonDiff;
+use TreeWalker;
+use const PHP_EOL;
 
 final class JsonContext implements Context
 {
@@ -26,15 +27,24 @@ final class JsonContext implements Context
      */
     public function theJsonShouldBeEqualTo(PyStringNode $string)
     {
-        $json = new Jsonq();
-        $json->json((string)$string);
-        $r = new JsonDiff(
-            \json_decode((string)$json->toJson()),
-            \json_decode((string)$this->getJson()->toJson()),
-            JsonDiff::REARRANGE_ARRAYS
+        $expected = \json_decode($string->getRaw(), true);
+        $actual = \json_decode((string)$this->getJson()->toJson(), true);
+        $treewalker = new TreeWalker([
+            "debug" => false,                      //true => return the execution time, false => not
+            "returntype" => "array"]         //Returntype = ["obj","jsonstring","array"]
         );
-
-        Assert::assertEquals(0, $r->getDiffCnt());
+        $a = $treewalker->getdiff($expected, $actual);
+        $new = $a['new'];
+        $removed = $a['removed'];
+        $edited = $a['edited'];
+        if (empty($new) && empty($removed) && empty ($edited)) {
+            return;
+        }
+        $message = 'Failed asserting that two json object where equal, found the following differences:' . PHP_EOL .
+            'new: ' . \json_encode($new) . PHP_EOL .
+            'removed: ' . \json_encode($removed) . PHP_EOL .
+            'edited: ' . \json_encode($edited);
+        Assert::fail($message);
     }
 
     private function getJson(): Jsonq
@@ -52,7 +62,7 @@ final class JsonContext implements Context
         throw new PendingException();
     }
 
-        /**
+    /**
      * @Then the JSON should be like:
      */
     public function theJsonShouldBeLike(PyStringNode $expectedString)
@@ -67,10 +77,10 @@ final class JsonContext implements Context
 
         // For chinese chars
         $actual = \json_encode(\json_decode($this->getJson()->toJson()), JSON_UNESCAPED_UNICODE);
-        
+
         Assert::assertRegExp($removedLinebaksAndWhitespace, $actual);
     }
-    
+
     /**
      * @Then the JSON nodes should be equal to:
      */

@@ -2,7 +2,7 @@
 
 namespace Gvf\SymfonyRestExtension\HttpCall;
 
-final class HttpCallResultPool
+class HttpCallResultPool
 {
     /**
      * @var HttpCallResult|null
