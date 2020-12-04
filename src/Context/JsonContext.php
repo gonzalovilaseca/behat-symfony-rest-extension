@@ -33,7 +33,7 @@ final class JsonContext implements Context
             "debug" => false,                      //true => return the execution time, false => not
             "returntype" => "array"]         //Returntype = ["obj","jsonstring","array"]
         );
-        $a = $treewalker->getdiff($expected, $actual);
+        $a = $treewalker->getdiff($actual,$expected);
         $new = $a['new'];
         $removed = $a['removed'];
         $edited = $a['edited'];
