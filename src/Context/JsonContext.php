@@ -118,7 +118,15 @@ final class JsonContext implements Context
      */
     public function theJsonNodeShouldMatch($node, $pattern)
     {
-        throw new PendingException();
+        $json = $this->getJson();
+
+        $actual = (string)$this->getJson()->toJson();
+
+        if (preg_match($pattern, $actual) === 0) {
+            throw new \Exception(
+                sprintf("The node value is '%s'", json_encode($actual))
+            );
+        }
     }
 
     /**
