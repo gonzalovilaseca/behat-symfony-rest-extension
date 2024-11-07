@@ -4,7 +4,7 @@
   "type": "project",
   "license": "MIT",
   "require": {
-    "php": "^7.4",
+    "php": "^8.1",
     "behat/behat": "^3.5",
     "nahid/jsonq": "^5.2",
     "phpunit/phpunit": "^9.3",
